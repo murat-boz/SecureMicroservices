@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -40,10 +41,11 @@ namespace Movies.Client
 
                 options.ClientId     = "movies_mvc_client";
                 options.ClientSecret = "secret";
-                options.ResponseType = "code";
+                options.ResponseType = "code id_token";
 
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");
+                options.Scope.Add("movieAPI");
 
                 options.SaveTokens                    = true;
                 options.GetClaimsFromUserInfoEndpoint = true;
@@ -65,13 +67,7 @@ namespace Movies.Client
                 configure.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
             });
 
-            services.AddSingleton(new ClientCredentialsTokenRequest
-            {
-                Address      = "https://localhost:5005/connect/token",
-                ClientId     = "movieClient",
-                ClientSecret = "secret",
-                Scope        = "movieAPI"
-            });
+            services.AddHttpContextAccessor();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

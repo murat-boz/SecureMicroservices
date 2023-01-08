@@ -1,4 +1,7 @@
 ﻿using IdentityModel.Client;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System;
 using System.Net.Http;
 using System.Threading;
@@ -8,33 +11,23 @@ namespace Movies.Client.HttpHandlers
 {
     public class AuthenticationDelegatingHandler : DelegatingHandler
     {
-        private readonly IHttpClientFactory httpClientFactory;
-        private readonly ClientCredentialsTokenRequest clientCredentialsTokenRequest;
+        private readonly IHttpContextAccessor httpContextAccessor;
 
-        public AuthenticationDelegatingHandler(
-            IHttpClientFactory httpClientFactory,
-            ClientCredentialsTokenRequest clientCredentialsTokenRequest)
+        public AuthenticationDelegatingHandler(IHttpContextAccessor httpContextAccessor)
         {
-            this.httpClientFactory = httpClientFactory
-                ?? throw new ArgumentNullException(nameof(this.httpClientFactory));
-
-            this.clientCredentialsTokenRequest = clientCredentialsTokenRequest 
-                ?? throw new ArgumentNullException(nameof(this.clientCredentialsTokenRequest));
+            this.httpContextAccessor = httpContextAccessor;
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var httpClient = this.httpClientFactory.CreateClient("IDPClient");
+            var accesToken = 
+                await this.httpContextAccessor.HttpContext
+                .GetTokenAsync(OpenIdConnectParameterNames.AccessToken);
 
-            var tokenResponse = await httpClient.RequestClientCredentialsTokenAsync(
-                this.clientCredentialsTokenRequest, cancellationToken);
-
-            if (tokenResponse.IsError)
+            if (!string.IsNullOrEmpty(accesToken))
             {
-                throw new HttpRequestException("Something went wrong while requesting the access token");
+                request.SetBearerToken(accesToken);
             }
-
-            request.SetBearerToken(tokenResponse.AccessToken);
 
             return await base.SendAsync(request, cancellationToken);
         }
