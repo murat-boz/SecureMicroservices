@@ -23,7 +23,8 @@ namespace Movies.Client.Controllers
         // GET: Movies
         public async Task<IActionResult> Index()
         {
-            LogTokenAndClaims();
+            await LogTokenAndClaims();
+
             return View(await this.movieApiService.GetMovies());
         }
 
@@ -37,6 +38,13 @@ namespace Movies.Client.Controllers
             {
                 Debug.WriteLine($"Claim type: {claim.Type} - Claim value: {claim.Value}");
             }
+        }
+
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> OnlyAdmin()
+        {
+            var userInfo = await this.movieApiService.GetUserInfo();
+            return View(userInfo);
         }
 
         public async Task Logout()

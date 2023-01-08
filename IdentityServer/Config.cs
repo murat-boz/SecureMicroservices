@@ -4,6 +4,7 @@ using IdentityServer4.Test;
 using IdentityServer4;
 using System.Collections.Generic;
 using System.Security.Claims;
+using IdentityServer.Extensions;
 
 namespace IdentityServer
 {
@@ -35,7 +36,10 @@ namespace IdentityServer
                        {
                            IdentityServerConstants.StandardScopes.OpenId,
                            IdentityServerConstants.StandardScopes.Profile,
-                           "movieAPI"
+                           IdentityServerConstants.StandardScopes.Address,
+                           IdentityServerConstants.StandardScopes.Email,
+                           "movieAPI",
+                           IdentityServerConstantsExtensions.StandardScopesExtensions.Roles
                        }
                    }
             };
@@ -56,7 +60,10 @@ namespace IdentityServer
           new IdentityResource[]
           {
               new IdentityResources.OpenId(),
-              new IdentityResources.Profile()
+              new IdentityResources.Profile(),
+              new IdentityResources.Address(),
+              new IdentityResources.Email(),
+              new IdentityResourcesExtensions.Roles()
           };
 
         public static List<TestUser> TestUsers =>
